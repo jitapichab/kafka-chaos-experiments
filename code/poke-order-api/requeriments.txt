@@ -1,0 +1,10 @@
+fastapi
+uvicorn
+sqlalchemy
+alembic
+asyncpg
+pydantic
+confluent-kafka
+psycopg2
+greenlet
+yunopyutils

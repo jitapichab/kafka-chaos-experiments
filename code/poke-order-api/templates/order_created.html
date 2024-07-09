@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Order Created</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container mt-5">
+        <div class="alert alert-success" role="alert">
+            <h4 class="alert-heading">Order Created Successfully!</h4>
+            <p>Your order has been created with the following details:</p>
+            <hr>
+            <ul class="list-group">
+                <li class="list-group-item"><strong>Order ID:</strong> {{ order.id }}</li>
+                <li class="list-group-item"><strong>User ID:</strong> {{ order.user_id }}</li>
+                <li class="list-group-item"><strong>pokemon:</strong> {{ order.pokemon }}</li>
+                <li class="list-group-item"><strong>Country:</strong> {{ order.country }}</li>
+                <li class="list-group-item"><strong>Price:</strong> {{ order.price }}</li>
+                <li class="list-group-item"><strong>State:</strong> {{ order.state.value }}</li>
+                <li class="list-group-item"><strong>Timestamp:</strong> {{ order.timestamp }}</li>
+            </ul>
+            <hr>
+            <p class="mb-0">
+                <a href="/create_order" class="btn btn-primary">Create Another Order</a>
+                <a href="/orders" class="btn btn-secondary">View All Orders</a>
+            </p>
+        </div>
+    </div>
+    <!-- Bootstrap JS and dependencies (optional, for advanced Bootstrap components) -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>

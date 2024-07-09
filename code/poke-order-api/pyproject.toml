@@ -1,0 +1,25 @@
+[project]
+name = "poke-order-api"
+version = "0.1.0"
+description = "Default template for PDM package"
+authors = [
+    {name = "Jorge Tapicha", email = "jitapichab@gmail.com"},
+]
+dependencies = [
+    "fastapi>=0.111.0",
+    "alembic>=1.13.2",
+    "confluent-kafka>=2.4.0",
+    "yunopyutils>=1.0.0a2",
+    "asyncpg>=0.29.0",
+]
+requires-python = ">=3.10"
+readme = "README.md"
+license = {text = "MIT"}
+
+
+[tool.pdm]
+distribution = false
+
+[tool.pdm.scripts]
+export = {cmd = "pdm export -f requirements -o requirements.txt --without-hashes --prod", help = "Generate requirements file"}
+main = {cmd = "./start.sh", help = "Run the main application"}

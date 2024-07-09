@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Create Poke Order</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container mt-5">
+        <h1 class="mb-4">Create Order</h1>
+        <form action="/create_order" method="post" class="needs-validation" novalidate>
+            <div class="form-group">
+                <label for="user_id">User ID</label>
+                <input type="number" class="form-control" id="user_id" name="user_id" required>
+                <div class="invalid-feedback">
+                    Please provide a valid User ID.
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="pokemon">pokemon</label>
+                <input type="text" class="form-control" id="pokemon" name="pokemon" required>
+                <div class="invalid-feedback">
+                    Please provide a valid pokemon.
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="country">Country</label>
+                <input type="text" class="form-control" id="country" name="country" required>
+                <div class="invalid-feedback">
+                    Please provide a valid Country.
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="price">Price (in dollars)</label>
+                <input type="number" step="0.01" class="form-control" id="price" name="price" required>
+                <div class="invalid-feedback">
+                    Please provide a valid Price.
+                </div>
+            </div>
+            <button type="submit" class="btn btn-primary">Create Order</button>
+        </form>
+    </div>
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script>
+        (function() {
+            'use strict';
+            window.addEventListener('load', function() {
+                var forms = document.getElementsByClassName('needs-validation');
+                var validation = Array.prototype.filter.call(forms, function(form) {
+                    form.addEventListener('submit', function(event) {
+                        if (form.checkValidity() === false) {
+                            event.preventDefault();
+                            event.stopPropagation();
+                        }
+                        form.classList.add('was-validated');
+                    }, false);
+                });
+            }, false);
+        })();
+    </script>
+</body>
+</html>
