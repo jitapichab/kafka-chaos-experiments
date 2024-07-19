@@ -1,12 +1,12 @@
 from typing import Optional, List
-from fastapi import APIRouter, Request, Depends, Form, HTTPException
+from fastapi import APIRouter, Request, Depends, Form, HTTPException, Query
 from fastapi.templating import Jinja2Templates
 from fastapi.responses import HTMLResponse
 
 from sqlalchemy.ext.asyncio import AsyncSession
 from yunopyutils import build_logger
 
-from . import crud, schemas, database,  kafka_producer
+from . import crud, schemas, database,  kafka_producer,  models
 from .dependencies import get_user_id
 
 _LOGGER = build_logger(__name__)
@@ -48,15 +48,29 @@ async def create_order(
 
 @router.get("/list_orders", response_class=HTMLResponse)
 async def list_orders(
-    request: Request, 
-    user_id: Optional[int] = Depends(get_user_id),
+    request: Request,
+    state: Optional[str] = Query(None),
+    skip: int = Query(0, ge=0),
+    limit: int = Query(20, gt=0),
     db: AsyncSession = Depends(database.get_db)
 ):
     try:
-        orders = await crud.get_orders(db, user_id)
+        # Convert state string to OrderState enum if it's a valid state
+        state_filter = (
+            models.OrderState(state)
+            if state in models.OrderState.__members__ else None
+        )
+        orders = await crud.get_orders(db, state=state_filter,
+                                       skip=skip, limit=limit)
         return templates.TemplateResponse(
             "list_orders.html",
-            {"request": request, "orders": orders, "user_id": user_id})
+            {
+                "request": request,
+                "orders": orders,
+                "selected_state": state,
+                "skip": skip,
+                "limit": limit
+            })
     except Exception as e:
         _LOGGER.info(f"Error: {e}")
         raise HTTPException(status_code=500, detail="Internal Server Error")
@@ -72,11 +86,21 @@ async def new_order(order: schemas.PokeOrderCreate,
 
 
 @router.get("/orders/", response_model=List[schemas.PokeOrder])
-async def read_orders(user_id: Optional[int] = None, 
+async def read_orders(state: Optional[str] = Query(None),
+                      skip: int = Query(0, ge=0),
+                      limit: int = Query(20, gt=0),
                       db: AsyncSession = Depends(database.get_db)):
-    orders = await crud.get_orders(db, user_id)
+    orders = await crud.get_orders(db, state=state,
+                                   skip=skip, limit=limit)
     return orders
 
+@router.get("/orders/{order_id}", response_model=schemas.PokeOrder)
+async def get_order_by_id(order_id: int,
+                          db: AsyncSession = Depends(database.get_db)):
+    order = await crud.get_order_by_id(db, order_id)
+    if order is None:
+        raise HTTPException(status_code=404, detail="Order not found")
+    return order
 
 @router.put("/orders/{order_id}", response_model=schemas.PokeOrder)
 async def update_order_state(

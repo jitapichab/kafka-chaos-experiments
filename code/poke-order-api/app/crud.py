@@ -12,15 +12,19 @@ async def create_order(db: Session, order: schemas.PokeOrderCreate):
     return db_order
 
 
-async def get_orders(db: Session, user_id: int = None):
-    if user_id is not None:
-        result = await db.execute(
-            select(models.PokeOrder).filter(
-                models.PokeOrder.user_id == user_id)
-            )
-    else:
-        result = await db.execute(select(models.PokeOrder))
+async def get_orders(db: Session,
+                     state: models.OrderState = None,
+                     skip: int = 0, limit: int = 10):
+    query = select(models.PokeOrder)
+    if state is not None:
+        query = query.filter(models.PokeOrder.state == state)
+    query = query.offset(skip).limit(limit)
+    result = await db.execute(query)
     return result.scalars().all()
+
+
+async def get_order_by_id(db: Session, order_id: int):
+    return await db.get(models.PokeOrder, order_id)
 
 
 async def update_order_state(db: Session, order_id: int,
