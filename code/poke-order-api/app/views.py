@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, List
 from fastapi import APIRouter, Request, Depends, Form, HTTPException
 from fastapi.templating import Jinja2Templates
 from fastapi.responses import HTMLResponse
@@ -6,7 +6,7 @@ from fastapi.responses import HTMLResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 from yunopyutils import build_logger
 
-from . import crud, schemas, database
+from . import crud, schemas, database,  kafka_producer
 from .dependencies import get_user_id
 
 _LOGGER = build_logger(__name__)
@@ -15,9 +15,11 @@ router = APIRouter()
 
 templates = Jinja2Templates(directory="templates")
 
+
 @router.get("/create_order", response_class=HTMLResponse)
 async def create_order_form(request: Request):
     return templates.TemplateResponse("create_order.html", {"request": request})
+
 
 @router.post("/create_order", response_class=HTMLResponse)
 async def create_order(
@@ -34,6 +36,8 @@ async def create_order(
                                         country=country,
                                         price=price)
         db_order = await crud.create_order(db, order)
+        order_data = schemas.PokeOrder.from_orm(db_order).dict()
+        kafka_producer.produce_order_message(order_data)
         return templates.TemplateResponse(
             "order_created.html",
             {"request": request, "order": db_order})
@@ -42,7 +46,7 @@ async def create_order(
         raise HTTPException(status_code=500, detail="Internal Server Error")
 
 
-@router.get("/orders", response_class=HTMLResponse)
+@router.get("/list_orders", response_class=HTMLResponse)
 async def list_orders(
     request: Request, 
     user_id: Optional[int] = Depends(get_user_id),
@@ -56,7 +60,23 @@ async def list_orders(
     except Exception as e:
         _LOGGER.info(f"Error: {e}")
         raise HTTPException(status_code=500, detail="Internal Server Error")
-    
+
+
+@router.post("/orders/", response_model=schemas.PokeOrder)
+async def new_order(order: schemas.PokeOrderCreate,
+                    db: AsyncSession = Depends(database.get_db)):
+    db_order = await crud.create_order(db, order)
+    order_data = schemas.PokeOrder.from_orm(db_order).dict()
+    kafka_producer.produce_order_message(order_data)
+    return db_order
+
+
+@router.get("/orders/", response_model=List[schemas.PokeOrder])
+async def read_orders(user_id: Optional[int] = None, 
+                      db: AsyncSession = Depends(database.get_db)):
+    orders = await crud.get_orders(db, user_id)
+    return orders
+
 
 @router.put("/orders/{order_id}", response_model=schemas.PokeOrder)
 async def update_order_state(

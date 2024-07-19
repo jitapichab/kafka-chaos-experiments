@@ -7,7 +7,7 @@
 <body>
     <div class="container mt-4">
         <h1 class="mb-4">List Poke Orders</h1>
-        <form action="/orders" method="get" class="form-inline mb-4">
+        <form action="/list_orders" method="get" class="form-inline mb-4">
             <label for="user_id" class="mr-2">Filter by User ID:</label>
             <input type="number" id="user_id" name="user_id" value="{{ user_id if user_id is not none else '' }}" class="form-control mr-2">
             <input type="submit" value="Filter" class="btn btn-primary">

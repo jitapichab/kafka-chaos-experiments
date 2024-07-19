@@ -11,6 +11,7 @@ KAFKA_BOOTSTRAP_SERVERS = Config.KAFKA_BOOTSTRAP_SERVERS
 KAFKA_CLIENT_ID = Config.KAFKA_CLIENT_ID
 KAFKA_ACKS = Config.KAFKA_ACKS
 RETRIES = Config.RETRIES
+TOPIC = Config.KAFKA_TOPIC
 
 
 KAFKA_CONFIG = {
@@ -23,7 +24,7 @@ KAFKA_CONFIG = {
 producer = Producer(KAFKA_CONFIG)
 
 
-def delivery_report(err, msg):
+def delivery_callback(err, msg):
     if err is not None:
         _LOGGER.info(f"Message delivery failed: {err}")
     else:
@@ -31,7 +32,7 @@ def delivery_report(err, msg):
 
 
 def produce_order_message(order):
-    topic = "orders"
     message = json.dumps(order, default=str)
-    producer.produce(topic, message.encode('utf-8'), callback=delivery_report)
+    producer.produce(TOPIC, message.encode('utf-8'),
+                     callback=delivery_callback)
     producer.flush()

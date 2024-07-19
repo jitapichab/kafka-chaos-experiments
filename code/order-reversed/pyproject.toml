@@ -1,20 +1,18 @@
 [project]
-name = "poke-order-api"
+name = "order-reversed"
 version = "0.1.0"
 description = "Default template for PDM package"
 authors = [
     {name = "Jorge Tapicha", email = "jitapichab@gmail.com"},
 ]
 dependencies = [
-    "fastapi>=0.111.0",
-    "alembic>=1.13.2",
-    "confluent-kafka>=2.4.0",
+    "psycopg2>=2.9.9",
+    "apscheduler>=3.10.4",
     "yunopyutils>=1.0.0a2",
-    "asyncpg>=0.29.0",
 ]
 requires-python = ">=3.10"
 readme = "README.md"
-license = {text = "MIT"}
+license = {text = "Apache-2.0"}
 
 
 [tool.pdm]
@@ -22,4 +20,4 @@ distribution = false
 
 [tool.pdm.scripts]
 exp = {cmd = "pdm export -f requirements -o requirements.txt --without-hashes --no-extras  --no-markers --prod", help = "Generate requirements file"}
-main = {cmd = "./start.sh", help = "Run the main application"}
+main = {cmd = "python app/main.py", help = "Run the main application"}
