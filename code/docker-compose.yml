@@ -52,6 +52,11 @@ services:
     container_name: fastapi
     environment:
       DATABASE_URL: postgresql+asyncpg://user:password@postgres:5432/poke_orders
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_USER: user
+      DB_PASSWORD: password
+      DB_NAME: poke_orders
       KAFKA_BOOTSTRAP_SERVERS: kafka:9092
       KAFKA_CLIENT_ID: poke-producer
       KAFKA_TOPIC: poke-orders
