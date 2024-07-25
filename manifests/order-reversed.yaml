@@ -1,0 +1,30 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: order-reversed
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: order-reversed
+  template:
+    metadata:
+      labels:
+        app: order-reversed
+    spec:
+      containers:
+      - name: order-reversed
+        image: jitapichab/order-reversed:v0.1.0-test
+        env:
+        - name: DB_HOST
+          value: DB_HOST_SED
+        - name: DB_PORT
+          value: "5432"
+        - name: DB_USER
+          value: poke_user
+        - name: DB_PASSWORD
+          value: poke_password
+        - name: DB_NAME
+          value: poke_orders
+        - name: EXPIRED_ORDER_TIME
+          value: "2"

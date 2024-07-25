@@ -34,6 +34,8 @@ class Worker:
             "enable.auto.commit": False,
         }
         return Consumer(conf)
+    
+    
 
     def update_order_state(self, order_id, state):
         url = f'{self.url_poke_order_api}/{order_id}'

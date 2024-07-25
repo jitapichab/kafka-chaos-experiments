@@ -1,0 +1,26 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: order-updater
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: order-updater
+  template:
+    metadata:
+      labels:
+        app: order-updater
+    spec:
+      containers:
+      - name: order-updater
+        image: jitapichab/order-updater:v0.1.0-test
+        env:
+        - name: KAFKA_BOOTSTRAP_SERVERS
+          value: BOOSTRAP_SERVERS_SED
+        - name: CONSUMER_GROUP_ID
+          value: order-updater
+        - name: CONSUMER_TOPIC
+          value: poke-orders-state
+        - name: URL_POKE_ORDER_API
+          value: http://poke-order-api-svc:8000/orders

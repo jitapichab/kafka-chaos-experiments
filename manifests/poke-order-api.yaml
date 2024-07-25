@@ -1,0 +1,54 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: poke-order-api
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: poke-order-api
+  template:
+    metadata:
+      labels:
+        app: poke-order-api
+    spec:
+      containers:
+      - name: poke-order-api
+        image: jitapichab/poke-order-api:v0.1.0-test
+        ports:
+        - containerPort: 8000
+        env:
+        - name: DATABASE_URL
+          value: postgresql+asyncpg://poke_user:poke_password@DB_HOST_SED:5432/poke_orders
+        - name: DB_HOST
+          value: DB_HOST_SED
+        - name: DB_PORT
+          value: "5432"
+        - name: DB_USER
+          value: poke_user
+        - name: DB_PASSWORD
+          value: poke_password
+        - name: DB_NAME
+          value: poke_orders
+        - name: KAFKA_BOOTSTRAP_SERVERS
+          value: BOOSTRAP_SERVERS_SED
+        - name: KAFKA_CLIENT_ID
+          value: poke-producer
+        - name: KAFKA_TOPIC
+          value: poke-orders
+        - name: KAFKA_ACKS
+          value: all
+        - name: RETRIES
+          value: "3"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: poke-order-api-svc
+spec:
+  selector:
+    app: poke-order-api
+  ports:
+    - protocol: TCP
+      port: 8000
+      targetPort: 8000

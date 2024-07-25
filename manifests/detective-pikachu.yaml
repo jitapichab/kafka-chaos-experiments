@@ -1,0 +1,28 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: detective-pikachu
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: detective-pikachu
+  template:
+    metadata:
+      labels:
+        app: detective-pikachu
+    spec:
+      containers:
+      - name: detective-pikachu
+        image: jitapichab/detective-pikachu:v0.1.0-test
+        env:
+        - name: KAFKA_BOOTSTRAP_SERVERS
+          value: BOOSTRAP_SERVERS_SED
+        - name: PRODUCER_CLIENT_ID
+          value: poke-producer
+        - name: PRODUCER_TOPIC
+          value: poke-orders-state
+        - name: CONSUMER_GROUP_ID
+          value: poke-order-consumer
+        - name: CONSUMER_TOPIC
+          value: poke-orders
