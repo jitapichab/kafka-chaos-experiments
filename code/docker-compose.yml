@@ -47,8 +47,9 @@ services:
       - poke-orders
 
   poke-order-api:
-    image: jitapichab/poke-order-api:v0.1.0-test
-    container_name: fastapi
+    build:
+      context: ./poke-order-api
+    container_name: poke-order-api
     environment:
       DATABASE_URL: postgresql+asyncpg://user:password@postgres:5432/poke_orders
       DB_HOST: postgres
