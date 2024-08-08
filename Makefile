@@ -9,6 +9,11 @@ ARGO_WORKFLOWS_VERSION ?= v3.5.8
 MANIFEST_DIR = manifests
 MANIFESTS = $(MANIFEST_DIR)/detective-pikachu.yaml $(MANIFEST_DIR)/order-reversed.yaml $(MANIFEST_DIR)/order-updater.yaml $(MANIFEST_DIR)/poke-order-api.yaml
 
+# Target to install Argo Workflows and create a token
+install-argo:
+	@echo "Installing Argo Workflows"
+	kubectl create namespace argo || true
+	kubectl apply -n argo -f https://github.com/argoproj/argo-workflows/releases/download/${ARGO_WORKFLOWS_VERSION}/quick-start-minimal.yaml
 
 # Target to deploy manifests
 deploy: $(MANIFESTS)
@@ -16,18 +21,12 @@ deploy: $(MANIFESTS)
 	@for manifest in $(MANIFESTS); do \
 		sed -e "s/DB_HOST_SED/$(DB_HOST)/g" \
 			-e "s/BOOSTRAP_SERVERS_SED/$(BOOSTRAP_SERVERS)/g" \
-			$$manifest | kubectl apply -f - ; \
+			$$manifest | kubectl -n default apply -f - ; \
 	done
 
-# Target to install Argo Workflows and create a token
-install-argo:
-	@echo "Installing Argo Workflows"
-	kubectl create namespace argo || true
-	kubectl apply -n argo -f https://github.com/argoproj/argo-workflows/releases/download/${ARGO_WORKFLOWS_VERSION}/quick-start-minimal.yaml
-	@echo "Creating Argo Workflows token"
-	kubectl create sa argo-workflows-sa -n argo
-	kubectl create clusterrolebinding argo-workflows-sa-binding --clusterrole=admin --serviceaccount=argo-workflows:argo-workflows-sa
-	@ARGO_TOKEN=$$(kubectl create token argo-workflows-sa -n argo) && echo "Argo Workflows token: $$ARGO_TOKEN"
+poke-order-api:
+	@echo "Setting up port forwarding to Poke Order API"
+	kubectl -n default port-forward service/poke-order-api-svc 8000:8000
 
 argo-server:
 	@echo "Setting up port forwarding to Argo Workflows server"
@@ -41,4 +40,4 @@ clean:
 	done
 	kubectl delete namespace argo-workflows --ignore-not-found
 
-.PHONY: deploy install-argo-workflows clean
+.PHONY: deploy install-argo clean

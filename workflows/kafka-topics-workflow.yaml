@@ -1,0 +1,226 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow
+metadata:
+  generateName: kafka-topics-
+spec:
+  entrypoint: handle-kafka-topics
+  arguments:
+    parameters:
+    - name: kafka-bootstrap-servers
+    - name: operation
+      value: "initial_topics_configuration" 
+  templates:
+  - name: handle-kafka-topics
+    steps:
+    - - name: decide-operation
+        template: decide-operation
+        arguments:
+          parameters:
+          - name: kafka-bootstrap-servers
+            value: "{{workflow.parameters.kafka-bootstrap-servers}}"
+          - name: operation
+            value: "{{workflow.parameters.operation}}"
+
+  - name: decide-operation
+    inputs:
+      parameters:
+      - name: kafka-bootstrap-servers
+      - name: operation
+    steps:
+    - - name: initial-topics-configuration
+        template: initial-topics-configuration
+        when: "{{inputs.parameters.operation}} == initial_topics_configuration"
+        arguments:
+          parameters:
+          - name: kafka-bootstrap-servers
+            value: "{{inputs.parameters.kafka-bootstrap-servers}}"
+      - name: fixed-topics-configuration
+        template: fixed-topics-configuration
+        when: "{{inputs.parameters.operation}} == fixed_topics_configuration"
+        arguments:
+          parameters:
+          - name: kafka-bootstrap-servers
+            value: "{{inputs.parameters.kafka-bootstrap-servers}}"
+      - name: describe-topics
+        template: describe-topics
+        when: "{{inputs.parameters.operation}} == describe_topics"
+        arguments:
+          parameters:
+          - name: kafka-bootstrap-servers
+            value: "{{inputs.parameters.kafka-bootstrap-servers}}"
+      - name: delete-topics
+        template: delete-topics
+        when: "{{inputs.parameters.operation}} == delete_topics"
+        arguments:
+          parameters:
+          - name: kafka-bootstrap-servers
+            value: "{{inputs.parameters.kafka-bootstrap-servers}}"
+
+  - name: initial-topics-configuration
+    inputs:
+      parameters:
+      - name: kafka-bootstrap-servers
+    steps:
+    - - name: create-poke-orders
+        template: create-topic
+        arguments:
+          parameters:
+          - name: topic-name
+            value: "poke-orders"
+          - name: kafka-bootstrap-servers
+            value: "{{inputs.parameters.kafka-bootstrap-servers}}"
+          - name: partitions
+            value: "3"
+          - name: replication-factor
+            value: "1"
+          - name: min-insync-replicas
+            value: "1"
+      - name: create-poke-orders-state
+        template: create-topic
+        arguments:
+          parameters:
+          - name: topic-name
+            value: "poke-orders-state"
+          - name: kafka-bootstrap-servers
+            value: "{{inputs.parameters.kafka-bootstrap-servers}}"
+          - name: partitions
+            value: "3"
+          - name: replication-factor
+            value: "3"
+          - name: min-insync-replicas
+            value: "2"
+    - - name: describe-topics
+        template: describe-topics
+        arguments:
+          parameters:
+          - name: kafka-bootstrap-servers
+            value: "{{inputs.parameters.kafka-bootstrap-servers}}"
+
+  - name: fixed-topics-configuration
+    inputs:
+      parameters:
+      - name: kafka-bootstrap-servers
+    steps:
+    - - name: update-poke-orders
+        template: update-topic-config
+        arguments:
+          parameters:
+          - name: topic-name
+            value: "poke-orders"
+          - name: kafka-bootstrap-servers
+            value: "{{inputs.parameters.kafka-bootstrap-servers}}"
+          - name: replication-factor
+            value: "3"
+          - name: min-insync-replicas
+            value: "2"
+    - - name: describe-topics
+        template: describe-topics
+        arguments:
+          parameters:
+          - name: kafka-bootstrap-servers
+            value: "{{inputs.parameters.kafka-bootstrap-servers}}"
+
+  - name: describe-topics
+    inputs:
+      parameters:
+      - name: kafka-bootstrap-servers
+    steps:
+    - - name: describe-poke-orders
+        template: describe-topic
+        arguments:
+          parameters:
+          - name: topic-name
+            value: "poke-orders"
+          - name: kafka-bootstrap-servers
+            value: "{{inputs.parameters.kafka-bootstrap-servers}}"
+      - name: describe-poke-orders-state
+        template: describe-topic
+        arguments:
+          parameters:
+          - name: topic-name
+            value: "poke-orders-state"
+          - name: kafka-bootstrap-servers
+            value: "{{inputs.parameters.kafka-bootstrap-servers}}"
+
+  - name: delete-topics
+    inputs:
+      parameters:
+      - name: kafka-bootstrap-servers
+    steps:
+    - - name: delete-poke-orders
+        template: delete-topic
+        arguments:
+          parameters:
+          - name: topic-name
+            value: "poke-orders"
+          - name: kafka-bootstrap-servers
+            value: "{{inputs.parameters.kafka-bootstrap-servers}}"
+      - name: delete-poke-orders-state
+        template: delete-topic
+        arguments:
+          parameters:
+          - name: topic-name
+            value: "poke-orders-state"
+          - name: kafka-bootstrap-servers
+            value: "{{inputs.parameters.kafka-bootstrap-servers}}"
+
+  - name: create-topic
+    inputs:
+      parameters:
+      - name: topic-name
+      - name: kafka-bootstrap-servers
+      - name: partitions
+      - name: replication-factor
+      - name: min-insync-replicas
+    container:
+      image: confluentinc/cp-kafka:latest
+      command: ["/bin/sh", "-c"]
+      args: ["kafka-topics --create --topic {{inputs.parameters.topic-name}} --partitions {{inputs.parameters.partitions}} --replication-factor {{inputs.parameters.replication-factor}} --config min.insync.replicas={{inputs.parameters.min-insync-replicas}} --bootstrap-server {{inputs.parameters.kafka-bootstrap-servers}}"]
+
+  - name: update-topic-config
+    inputs:
+      parameters:
+      - name: topic-name
+      - name: kafka-bootstrap-servers
+      - name: replication-factor
+      - name: min-insync-replicas
+    script:
+      image: confluentinc/cp-kafka:latest
+      command: ["bash"]
+      source: |
+        # Create the reassignment JSON file with specified broker IDs
+        echo '{
+          "partitions": [
+            {"topic": "{{inputs.parameters.topic-name}}", "partition": 0, "replicas": [1,2,3]},
+            {"topic": "{{inputs.parameters.topic-name}}", "partition": 1, "replicas": [3,1,2]},
+            {"topic": "{{inputs.parameters.topic-name}}", "partition": 2, "replicas": [2,3,1]}
+          ],
+          "version": 1
+        }' > /tmp/increase-replication-factor.json
+
+        # Reassign partitions
+        kafka-reassign-partitions --bootstrap-server {{inputs.parameters.kafka-bootstrap-servers}} --reassignment-json-file /tmp/increase-replication-factor.json --execute
+
+        # Update the min.insync.replicas configuration
+        kafka-configs --alter --entity-type topics --entity-name {{inputs.parameters.topic-name}} --add-config min.insync.replicas={{inputs.parameters.min-insync-replicas}} --bootstrap-server {{inputs.parameters.kafka-bootstrap-servers}}
+
+
+  - name: delete-topic
+    inputs:
+      parameters:
+      - name: topic-name
+      - name: kafka-bootstrap-servers
+    container:
+      image: confluentinc/cp-kafka:latest
+      command: ["/bin/sh", "-c"]
+      args: ["kafka-topics --delete --topic {{inputs.parameters.topic-name}} --bootstrap-server {{inputs.parameters.kafka-bootstrap-servers}}"]
+
+  - name: describe-topic
+    inputs:
+      parameters:
+      - name: topic-name
+      - name: kafka-bootstrap-servers
+    container:
+      image: confluentinc/cp-kafka:latest
+      command: ["/bin/sh", "-c"]
+      args: ["kafka-topics --describe --topic {{inputs.parameters.topic-name}} --bootstrap-server {{inputs.parameters.kafka-bootstrap-servers}}"]
