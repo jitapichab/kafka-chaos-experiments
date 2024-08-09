@@ -3,20 +3,31 @@ import requests
 import logging
 import argparse
 import time
+import os
 from typing import List, Optional, Dict, Any
 
 logging.basicConfig(level=logging.INFO,
                     format='%(asctime)s :: %(levelname)s :: %(message)s')
+
 logger = logging.getLogger(__name__)
 
+url_poke_order_api = os.getenv('URL_POKE_ORDER_API',
+                               'http://localhost:8000/orders')
 
-def arg_parser():
-    parser = argparse.ArgumentParser(description="Create random Pokemon orders.")
-    parser.add_argument('--num_orders', type=int, required=True, help='Number of orders to create')
-    parser.add_argument('--delay', type=float, required=True, help='Delay between requests in seconds')
-    parser.add_argument('--user_id', type=int, required=True, help='User ID for the orders')
+
+def arg_parser() -> argparse.Namespace:
+    parser = argparse.ArgumentParser(description="Create Pokemon orders.")
+    parser.add_argument('--num_orders', type=int, required=True,
+                        help='Number of orders to create')
+    parser.add_argument('--delay', type=float, required=True,
+                        help='Delay between requests in seconds')
+    parser.add_argument('--user_id', type=int, required=True,
+                        help='User ID for the orders')
+    parser.add_argument('--initial_delay', type=int, default=0,
+                        help='Initial delay before starting the orders',)
 
     return parser.parse_args()
+
 
 def read_countries(filename: str) -> List[str]:
     logger.info(f"Reading countries from file: {filename}")
@@ -44,8 +55,11 @@ def get_random_pokemon() -> Optional[str]:
         return None
 
 
-def create_order(user_id: int, pokemon: str, country: str, price: int) -> Dict[str, Any]:
-    url = 'http://localhost:8000/orders/'
+def create_order(user_id: int,
+                 pokemon: str,
+                 country: str,
+                 price: int) -> Dict[str, Any]:
+    url = url_poke_order_api
     headers = {
         'accept': 'application/json',
         'Content-Type': 'application/json'
@@ -62,10 +76,11 @@ def create_order(user_id: int, pokemon: str, country: str, price: int) -> Dict[s
     return response.json()
 
 
-
 def main():
 
     args = arg_parser()
+
+    time.sleep(args.initial_delay)
 
     countries = read_countries('countries.txt')
 

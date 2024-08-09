@@ -11,7 +11,7 @@ jobs:
 
     strategy:
       matrix:
-        service: [detective-pikachu, order-reversed, order-updater, poke-order-api,poke-syntethic-load]
+        service: [detective-pikachu, order-reversed, order-updater, poke-order-api,poke-synthetic-load]
         architecture: [amd64, arm64]
 
     steps:

@@ -111,6 +111,18 @@ services:
     networks:
       - poke-orders
 
+  poke-synthetic-load:
+    build: ./poke-synthetic-load
+    container_name: poke-synthetic-load
+    environment:
+      URL_POKE_ORDER_API: http://poke-order-api:8000/orders/
+    entrypoint: ["python", "main.py"]
+    command: ["--num_orders", "10", "--delay", "5","--user_id", "3" ]
+    depends_on:
+      - poke-order-api
+    networks:
+      - poke-orders
+
 networks:
   poke-orders:
     driver: bridge
