@@ -1,18 +1,17 @@
 # Kafka Chaos Experiments
 
-This repository contains an application based in a EDA (Event Driven Architecture) Example to run chaos kafka experiments based in chaostoolkit-kafka library. 
+This repository contains an application based on an EDA (Event Driven Architecture) Example to run chaos kafka experiments based on the chaostoolkit-kafka library. 
 
 ## Table of Contents
 
-- [Architecture](#Architecture)
+- [Architecture](#architecture)
 - [Prerequisites](#prerequisites)
 - [Installation](#installation)
   - [Docker Compose](#docker-compose)
   - [Kubernetes](#kubernetes)
-- [Usage](#usage)
-  - [Makefile Targets](#makefile-targets)
-- [Contributing](#contributing)
-- [License](#license)
+- [Testing](#testing)
+- [Next Steps](#next-steps)
+
 
 # Architecture
 
@@ -20,9 +19,9 @@ This repository contains an application based in a EDA (Event Driven Architectur
 
 This application simulates a Pokémon order site where Pokémon can be purchased and distributed to different countries. The order creation process is synchronous, meaning once an order is created, it is marked as pending in a database and published to a Kafka topic. 
 
-A fraud detection microservice then checks if the order meets certain criteria to be processed. If the order does not meet these criteria, it is marked as rejected. 
+A fraud detection microservice then checks if the order meets certain criteria to be processed. If an order does not meet these criteria, it is marked as rejected. 
 
-If orders are not updated within a certain time (e.g., 2 minutes), a worker checks these pending orders in the database and marks them as reversed to indicate a failure in processing.
+If orders are not updated within a certain time frame (e.g., 2 minutes), a worker checks these pending orders in the database and marks them as reversed to indicate a failure in processing.
 
 ## Components
 
@@ -61,9 +60,9 @@ Before running the experiments, ensure you have the following installed:
 - Make
 - kubectl
 - Argo-Workflows CLI
-- Infraestructure with Kubernetes Cluster, Kafka(3 brokers), PostgresQL ( you can use https://github.com/jitapichab/iac-playground)
+- nfrastructure with Kubernetes Cluster, Kafka(3 brokers), PostgresQL ( you can use https://github.com/jitapichab/iac-playground)
 
-If you want the deployment to be deploy and play, use the following configurations in your database:
+f you want the deployment to be ready to deploy and play, use the following configurations in your database:
 
 - **DB_USER**: `poke_user`
 - **DB_PASSWORD**: `poke_password`
@@ -75,7 +74,7 @@ You can install the application using docker-compose or in kubernetes.
 
 ### docker-compose
 
-To testing the application withouth syntetic load
+To test the application without synthetic load
 
 ```sh
 cd code
@@ -101,7 +100,7 @@ export BOOSTRAP_SERVERS={{your_kafka_bootstrap_servers}}
 argo submit kafka-topics-workflow.yaml -p kafka-bootstrap-servers=$BOOSTRAP_SERVERS -p operation=initial_topics_configuration --watch
 ```
 
-there are another operations that you can use like **fixed_topic_configurations**, to fix poke-orders topic after a chaos experiment **describe_topics** and **delete_topics**.
+There are other operations that you can use, like **fixed_topic_configurations**, to fix poke-orders topic after a chaos experiment **describe_topics** and **delete_topics**.
 
 - Deploy the kubernetes applications stack
 
@@ -115,7 +114,7 @@ make deploy DB_HOST=$DB_HOST BOOSTRAP_SERVERS=$BOOSTRAP_SERVERS
 
 ## Testing
 
-once the application is deployed, you can make a port-forwarding in kubernetes to access to the application
+Once the application is deployed, you can make a port-forwarding in kubernetes to access to the application
 
 
 ```sh
@@ -126,6 +125,36 @@ you can access to poke-order-api docs via http://localhost:8000/docs#/
 
 ![Swagger](media/swagger.png)
 
+
+Now we are ready to create poke ordes, we are going to do that using a workflow in argo-worflows 
+
+```sh
+argo submit code/synthetic-load-test-users.yaml --watch
+```
+
+You can check if the workflows are executing using the UI or in the terminal, to use the UI execute:
+
+```sh
+make argo-server
+```
+
+you can access to argo workflows UI docs via https://localhost:2746/
+
+![argo-workflows](media/argo-workflows-ui.png)
+
+Every step you check in the pipeline and it's running is the simulates a user. check the logs:
+
+![synthetic-load-logs](media/logs-synthetic-load.png)
+
+after that you can check the poke orders created https://localhost:8000/list_orders/
+
+![poke-orders](media/poke-orders.png)
+
+If you checked the image, you will notice that there are orders in successful or rejected state but not reversed... this is because reversed orders is the unwanted state of the system.
+
+## Next Steps
+
+Now we are ready to run chaos experiments using kafka-chaostoolkit library https://github.com/friki-io/chaostoolkit-kafka, to continue check the medium  post "Upcoming URL medium"
 
 
 

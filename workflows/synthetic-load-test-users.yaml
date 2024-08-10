@@ -1,0 +1,45 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow
+metadata:
+  generateName: iterate-poke-orders-
+spec:
+  entrypoint: iterate-poke-orders-users
+  templates:
+  - name: iterate-poke-orders-users
+    steps:
+    - - name: iterate-poke-orders-users
+        template: create-poke-synthetic-load-orders
+        arguments:
+          parameters:
+          - name: num_orders
+            value: "{{item.num_orders}}"
+          - name: delay
+            value: "{{item.delay}}"
+          - name: user_id
+            value: "{{item.user_id}}"
+        withItems:
+        - { num_orders: 500, delay: 5,  user_id: 1 }
+        - { num_orders: 500, delay: 5, user_id: 2 }
+        - { num_orders: 500, delay: 5, user_id: 3 }
+        - { num_orders: 500, delay: 5, user_id: 4 }
+        - { num_orders: 500, delay: 5, user_id: 5 }
+
+  - name: create-poke-synthetic-load-orders
+    inputs:
+      parameters:
+      - name: num_orders
+      - name: delay
+      - name: user_id
+    container:
+      image: jitapichab/poke-synthetic-load:v0.1.1-test
+      command: [python]
+      args: ["main.py", "--num_orders",
+            "{{inputs.parameters.num_orders}}",
+            "--delay",
+            "{{inputs.parameters.delay}}",
+            "--user_id", 
+            "{{inputs.parameters.user_id}}" 
+            ]
+      env:
+      - name: URL_POKE_ORDER_API
+        value: http://poke-order-api-svc.default.svc.cluster.local:8000/orders/
