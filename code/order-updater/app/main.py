@@ -34,10 +34,29 @@ class Worker:
             "enable.auto.commit": False,
         }
         return Consumer(conf)
-    
-    
+
+    def get_order(self, order_id):
+        url = f'{self.url_poke_order_api}/{order_id}'
+        headers = {
+            'accept': 'application/json'
+        }
+        try:
+            response = requests.get(url, headers=headers)
+            response.raise_for_status()
+            return response.json()
+        except Exception as req_err:
+            raise Exception(f'Error occurred while fetching order: {req_err}')
 
     def update_order_state(self, order_id, state):
+        order = self.get_order(order_id)
+
+        order_state = order.get('state')
+        _LOGGER.info(f"Order {order_id} current state: {order_state}")
+        if order.get('state') == 'reversed':
+            _LOGGER.info(f"Order {order_id} have state {order_state}. \
+                         No update performed.")
+            return None
+
         url = f'{self.url_poke_order_api}/{order_id}'
         headers = {
             'accept': 'application/json',

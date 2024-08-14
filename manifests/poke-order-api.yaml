@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
       - name: poke-order-api
-        image: jitapichab/poke-order-api:v0.1.0-test
+        image: jitapichab/poke-order-api:v0.1.2-test
         ports:
         - containerPort: 8000
         env:
