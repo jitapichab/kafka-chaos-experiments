@@ -36,8 +36,9 @@ argo-server:
 clean:
 	@echo "Cleaning up deployed resources"
 	@for manifest in $(MANIFESTS); do \
-		kubectl delete -f $$manifest --ignore-not-found ; \
+	    echo "Deleting $$manifest" ; \
+		kubectl delete -f $$manifest -n default; \
 	done
-	kubectl delete namespace argo-workflows --ignore-not-found
+#kubectl delete namespace argo --ignore-not-found
 
 .PHONY: deploy install-argo clean

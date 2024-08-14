@@ -1,5 +1,6 @@
 from sqlalchemy.future import select
 from sqlalchemy.orm import Session
+from sqlalchemy import text
 from . import models, schemas
 
 
@@ -38,5 +39,5 @@ async def update_order_state(db: Session, order_id: int,
 
 
 async def delete_all_orders(db: Session):
-    await db.execute('DELETE FROM poke_orders')
+    await db.execute(text('DELETE FROM poke_orders'))
     await db.commit()

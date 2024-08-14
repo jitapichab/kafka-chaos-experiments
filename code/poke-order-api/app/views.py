@@ -2,6 +2,7 @@ from typing import Optional, List
 from fastapi import APIRouter, Request, Depends, Form, HTTPException, Query
 from fastapi.templating import Jinja2Templates
 from fastapi.responses import HTMLResponse
+from fastapi.responses import JSONResponse
 
 from sqlalchemy.ext.asyncio import AsyncSession
 from yunopyutils import build_logger
@@ -117,4 +118,4 @@ async def update_order_state(
 @router.delete("/orders", response_class=HTMLResponse)
 async def delete_all_orders(db: AsyncSession = Depends(database.get_db)):
     await crud.delete_all_orders(db)
-    return {"detail": "All orders deleted"}
+    return JSONResponse(content={"detail": "All orders deleted"})
