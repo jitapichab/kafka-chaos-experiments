@@ -1,0 +1,63 @@
+---
+title: Kafka Consumer Lag and Corruption Chaos Experiment
+description: This experiment simulates a Kafka chaos scenario by producing a corrupt message and monitoring whether the consumer group experiences lag exceeding a specified threshold.
+
+configuration:
+  boostrap_servers:
+    type: env
+    key: BOOTSTRAP_SERVERS
+  topic: "poke-orders"
+  group_id: "poke-order-consumer"
+
+steady-state-hypothesis:
+  title: Check if the consumer group has lag under threshold
+  probes:
+  - name: Consumer group has lag under the threshold
+    type: probe
+    tolerance: True
+    provider:
+      type: python
+      module: chaoskafka.probes
+      func: check_consumer_lag_under_threshold
+      arguments:
+        bootstrap_servers: ${boostrap_servers}
+        group_id: ${group_id}
+        topic: ${topic}
+        threshold: 15
+        partition: 1
+
+method:
+- type: action
+  name: Produce corrupt Kafka message
+  provider:
+    type: python
+    module: chaoskafka.actions
+    func: produce_messages
+    arguments:
+      bootstrap_servers: ${boostrap_servers}
+      topic: ${topic}
+      partition: 1
+      messages:
+        - '{"id": 4054, "user_id": 2, "pokemon": "budew", "country": "Germany", "price": 246.0, "state": "pending", "timestamp": "2024-08-14 05:38:58.922008'
+  pauses:
+      after: 120
+  controls:
+    - name: calculate offsets and num_messages
+      provider:
+        type: python
+        module: chaoskafka.controls.get_production_offsets
+
+rollbacks:
+  - type: action
+    name: Manually Consume Unprocessable Kafka Message
+    provider:
+      type: python
+      module: chaoskafka.actions
+      func: consume_messages
+      arguments:
+        bootstrap_servers: ${boostrap_servers}
+        topic: ${topic}
+        group_id: ${group_id}
+        partition: 1
+        offset: ${earliest}
+        num_messages: ${num_messages}

@@ -1,0 +1,2 @@
+chaostoolkit-aws==0.35.1
+chaostoolkit-kafka

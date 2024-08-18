@@ -2,6 +2,7 @@ apiVersion: argoproj.io/v1alpha1
 kind: Workflow
 metadata:
   generateName: iterate-poke-orders-
+  namespace: argo
 spec:
   entrypoint: iterate-poke-orders-users
   templates:

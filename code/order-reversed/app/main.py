@@ -47,7 +47,7 @@ class Worker:
             connection.commit()
 
             _LOGGER.info(
-                f"{cursor.rowcount} orders were updated to 'rejected'."
+                f"{cursor.rowcount} orders were updated to 'reversed'."
                 )
 
         except (Exception, psycopg2.DatabaseError) as error:

@@ -1,0 +1,20 @@
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Sid": "AllowMskApis",
+            "Effect": "Allow",
+            "Action": [
+                "kafka:ListClusters",
+                "kafka:ListClustersV2",
+                "kafka:ListNodes",
+                "kafka:DescribeCluster",
+                "kafka:GetBootstrapBrokers",
+                "kafka:RebootBroker"
+            ],
+            "Resource": [
+                "*"
+            ]
+        }
+    ]
+}
