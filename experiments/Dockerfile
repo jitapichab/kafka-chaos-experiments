@@ -1,34 +1,14 @@
-FROM chaostoolkit/chaostoolkit
+FROM python:3.11-slim
 
 LABEL maintainer="chaos-kafka <jorge.tapich@friki.io>"
 
-USER root
+RUN groupadd -g 1001 chaos
+RUN useradd -m -d /home/chaos -u 1001 -g chaos chaos
 
-# Install bash, build dependencies, and other required packages
-RUN apk add --no-cache \
-    bash \
-    build-base \
-    zlib-dev \
-    bzip2-dev \
-    openssl-dev \
-    cyrus-sasl-dev \
-    python3-dev \
-    py3-pip \
-    wget \
-    git \
-    vim
-
-RUN git clone https://github.com/edenhill/librdkafka.git /tmp/librdkafka
-
-RUN cd /tmp/librdkafka && git checkout v2.5.0
-
-RUN cd /tmp/librdkafka && ./configure && make && make install
-
-WORKDIR /experiments
+WORKDIR /chaos
 
 ADD . .
 RUN pip install --no-cache-dir -r requirements.txt
 
-RUN rm -rf /tmp/librdkafka
-
 ENTRYPOINT ["/usr/local/bin/chaos"]
+CMD ["--help"]
