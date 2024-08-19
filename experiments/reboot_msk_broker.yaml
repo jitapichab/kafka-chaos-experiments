@@ -3,15 +3,9 @@ title: Reboot MSK broker !!!
 description: This Experiment Reboot a kafka broker and check that some topic doesn't have offline partitions !!!
 
 configuration:
-  aws_profile_name:
-    type: env
-    key: AWS_PROFILE
-  boostrap_servers:
+  BOOTSTRAP_servers:
     type: env
     key: BOOTSTRAP_SERVERS
-  aws_region:
-    type: env
-    key: AWS_REGION
   cluster_arn: 
     type: env
     key: MSK_CLUSTER_ARN
@@ -31,7 +25,7 @@ steady-state-hypothesis:
       module: chaoskafka.probes
       func: topic_has_no_offline_partitions
       arguments:
-        bootstrap_servers: ${boostrap_servers}
+        bootstrap_servers: ${BOOTSTRAP_servers}
         topic: ${topic}
 
 method:
@@ -45,4 +39,4 @@ method:
          cluster_arn: ${cluster_arn}
          broker_ids: ${broker_ids}
      pauses:
-      after: ${recovery_time}
+      after: ${recovery_cluster_time}

@@ -18,7 +18,7 @@ spec:
         image: jitapichab/order-updater:v0.1.3-test
         env:
         - name: KAFKA_BOOTSTRAP_SERVERS
-          value: BOOSTRAP_SERVERS_SED
+          value: BOOTSTRAP_SERVERS_SED
         - name: CONSUMER_GROUP_ID
           value: order-updater
         - name: CONSUMER_TOPIC

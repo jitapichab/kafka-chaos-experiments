@@ -96,8 +96,8 @@ make install-argo
 - Run argo workflows to create the kafka topics of the architecture in the first version of the experiment.
 
 ```sh
-export BOOSTRAP_SERVERS={{your_kafka_bootstrap_servers}} 
-argo submit kafka-topics-workflow.yaml -p kafka-bootstrap-servers=$BOOSTRAP_SERVERS -p operation=initial_topics_configuration --watch
+export BOOTSTRAP_SERVERS={{your_kafka_bootstrap_servers}} 
+argo submit kafka-topics-workflow.yaml -p kafka-bootstrap-servers=$BOOTSTRAP_SERVERS -p operation=initial_topics_configuration --watch
 ```
 
 There are other operations that you can use, like **fixed_topic_configurations**, to fix poke-orders topic after a chaos experiment **describe_topics** and **delete_topics**.
@@ -105,9 +105,9 @@ There are other operations that you can use, like **fixed_topic_configurations**
 - Deploy the kubernetes applications stack
 
 ```sh
-export BOOSTRAP_SERVERS={{your_kafka_bootstrap_servers}} 
+export BOOTSTRAP_SERVERS={{your_kafka_bootstrap_servers}} 
 export DB_HOST={{your_db_host}} 
-make deploy DB_HOST=$DB_HOST BOOSTRAP_SERVERS=$BOOSTRAP_SERVERS
+make deploy DB_HOST=$DB_HOST BOOTSTRAP_SERVERS=$BOOTSTRAP_SERVERS
 ```
 
 ![Kube deploy](media/kube-deploy.png)

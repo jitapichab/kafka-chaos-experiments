@@ -2,7 +2,7 @@
 
 # Variables
 DB_HOST ?= localhost
-BOOSTRAP_SERVERS ?= localhost:9092
+BOOTSTRAP SERVERS ?= localhost:9092
 ARGO_WORKFLOWS_VERSION ?= v3.5.8
 # Aditional Vars to be used in the iam configuration and the chaos pod
 NAMESPACE ?= kafka-chaos-experiments
@@ -32,10 +32,10 @@ install-argo:
 
 # Target to deploy application stack
 deploy: $(MANIFESTS)
-	@echo "Deploying manifests with DB_HOST=$(DB_HOST) and BOOSTRAP_SERVERS=$(BOOSTRAP_SERVERS)"
+	@echo "Deploying manifests with DB_HOST=$(DB_HOST) and BOOTSTRAP_SERVERS=$(BOOTSTRAP_SERVERS)"
 	@for manifest in $(MANIFESTS); do \
 		sed -e "s/DB_HOST_SED/$(DB_HOST)/g" \
-			-e "s/BOOSTRAP_SERVERS_SED/$(BOOSTRAP_SERVERS)/g" \
+			-e "s/BOOTSTRAP_SERVERS_SED/$(BOOTSTRAP_SERVERS)/g" \
 			$$manifest | kubectl -n default apply -f - ; \
 	done
 
@@ -55,7 +55,12 @@ configure-iam-service-account:
 	@chmod +x $(IAM_SCRIPT)
 	@$(IAM_SCRIPT) --policy_file "file://$(POLICY_FILE)"
 
-
+deploy-chaos-pod:
+	@echo "Deploying Kafka Chaos Experiments Pod with AWS_PROFILE=$(PROFILE), BOOTSTRAP_SERVERS=$(BOOTSTRAP_SERVERS), MSK_CLUSTER_ARN=$(MSK_CLUSTER_ARN), AWS_REGION=$(AWS_REGION)"
+	@sed \
+		-e "s|{{BOOTSTRAP_SERVERS}}|$(BOOTSTRAP_SERVERS)|g" \
+		-e "s|{{MSK_CLUSTER_ARN}}|$(MSK_CLUSTER_ARN)|g" \
+		$(MANIFEST_DIR)/kafka-chaos-experiments.yaml kubectl -n $(NAMESPACE) apply -f - ;
 
 # Target Clean up the application stack
 clean:
@@ -70,4 +75,4 @@ remove-argo:
 	@echo "Removing Argo Workflows"
 	kubectl delete namespace argo --ignore-not-found
 
-.PHONY: deploy install-argo clean remove-argo configure-iam-service-account
+.PHONY: deploy install-argo clean remove-argo configure-iam-service-account deploy-chaos-pod

@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: kafka-chaos-experiments
+  namespace: kafka-chaos-experiments
+spec:
+  serviceAccountName: kafka-chaos-experiments
+  containers:
+  - name: kafka-chaos-experiments
+    image: jitapichab/kafka-chaos-experiments:latest
+    command: ["sh", "-c"]
+    args: ["sleep 60000"]
+    env:
+    - name: BOOTSTRAP_SERVERS
+      value: "{{BOOTSTRAP_SERVERS}}"
+    - name: MSK_CLUSTER_ARN
+      value: "{{MSK_CLUSTER_ARN}}"

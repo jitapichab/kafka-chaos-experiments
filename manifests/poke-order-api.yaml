@@ -32,7 +32,7 @@ spec:
         - name: DB_NAME
           value: poke_orders
         - name: KAFKA_BOOTSTRAP_SERVERS
-          value: BOOSTRAP_SERVERS_SED
+          value: BOOTSTRAP_SERVERS_SED
         - name: KAFKA_CLIENT_ID
           value: poke-producer
         - name: KAFKA_TOPIC
