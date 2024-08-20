@@ -83,7 +83,14 @@ class Worker:
                     elif msg.error():
                         raise KafkaException(msg.error())
                 else:
-                    order = json.loads(msg.value().decode("utf-8"))
+                    try:
+                        order = json.loads(msg.value().decode("utf-8"))
+                    except json.JSONDecodeError:
+                        _LOGGER.error(
+                            f"Failed to decode JSON for message: {msg.value()}"
+                        )
+                        consumer.commit(msg)
+                        continue
                     _LOGGER.info(f"Consumed message: {order}")
                     order["state"] = (
                         "rejected" if fraud_rules(order) else "success"
