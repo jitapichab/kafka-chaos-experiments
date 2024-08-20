@@ -3,7 +3,7 @@ title: Reboot MSK broker !!!
 description: This Experiment Reboot a kafka broker and check that some topic doesn't have offline partitions !!!
 
 configuration:
-  BOOTSTRAP_servers:
+  BOOTSTRAP_SERVERS:
     type: env
     key: BOOTSTRAP_SERVERS
   cluster_arn: 
@@ -25,7 +25,7 @@ steady-state-hypothesis:
       module: chaoskafka.probes
       func: topic_has_no_offline_partitions
       arguments:
-        bootstrap_servers: ${BOOTSTRAP_servers}
+        bootstrap_servers: ${BOOTSTRAP_SERVERS}
         topic: ${topic}
 
 method:

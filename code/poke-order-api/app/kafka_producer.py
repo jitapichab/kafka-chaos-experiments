@@ -12,13 +12,15 @@ KAFKA_CLIENT_ID = Config.KAFKA_CLIENT_ID
 KAFKA_ACKS = Config.KAFKA_ACKS
 RETRIES = Config.RETRIES
 TOPIC = Config.KAFKA_TOPIC
+MESSAGE_TIMEOUT_MS = Config.MESSAGE_TIMEOUT_MS
 
 
 KAFKA_CONFIG = {
     'bootstrap.servers': KAFKA_BOOTSTRAP_SERVERS,
     'client.id': KAFKA_CLIENT_ID,
     'acks': KAFKA_ACKS,
-    'retries': RETRIES
+    'retries': RETRIES,
+    'message.timeout.ms': int(MESSAGE_TIMEOUT_MS)
 }
 
 producer = Producer(KAFKA_CONFIG)

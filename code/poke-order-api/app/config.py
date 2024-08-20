@@ -16,3 +16,4 @@ class Config:
     KAFKA_CLIENT_ID = os.getenv('KAFKA_CLIENT_ID', 'poke-producer')
     KAFKA_ACKS = os.getenv('KAFKA_ACKS', 'all')
     RETRIES = int(os.getenv('RETRIES', 3))
+    MESSAGE_TIMEOUT_MS = os.getenv('MESSAGE_TIMEOUT_MS', 2000)

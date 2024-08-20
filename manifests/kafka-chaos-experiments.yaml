@@ -8,6 +8,7 @@ spec:
   containers:
   - name: kafka-chaos-experiments
     image: jitapichab/kafka-chaos-experiments:latest
+    imagePullPolicy: Always
     command: ["sh", "-c"]
     args: ["sleep 60000"]
     env:

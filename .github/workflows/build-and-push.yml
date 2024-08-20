@@ -3,7 +3,8 @@ name: Build and Push Docker Images
 on:
   push:
     tags:
-      - '*'
+      - '*-test'
+      - '*-test-fix'
 
 jobs:
   build-and-push:

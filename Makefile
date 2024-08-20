@@ -60,7 +60,7 @@ deploy-chaos-pod:
 	@sed \
 		-e "s|{{BOOTSTRAP_SERVERS}}|$(BOOTSTRAP_SERVERS)|g" \
 		-e "s|{{MSK_CLUSTER_ARN}}|$(MSK_CLUSTER_ARN)|g" \
-		$(MANIFEST_DIR)/kafka-chaos-experiments.yaml kubectl -n $(NAMESPACE) apply -f - ;
+		$(MANIFEST_DIR)/kafka-chaos-experiments.yaml | kubectl -n $(NAMESPACE) apply -f - ;
 
 # Target Clean up the application stack
 clean:
