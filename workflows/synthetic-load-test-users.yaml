@@ -19,11 +19,11 @@ spec:
           - name: user_id
             value: "{{item.user_id}}"
         withItems:
-        - { num_orders: 500, delay: 5,  user_id: 1 }
-        - { num_orders: 500, delay: 5, user_id: 2 }
-        - { num_orders: 500, delay: 5, user_id: 3 }
-        - { num_orders: 500, delay: 5, user_id: 4 }
-        - { num_orders: 500, delay: 5, user_id: 5 }
+        - { num_orders: 1000, delay: 2,  user_id: 1 }
+        - { num_orders: 1000, delay: 2, user_id: 2 }
+        - { num_orders: 1000, delay: 2, user_id: 3 }
+        - { num_orders: 1000, delay: 2, user_id: 4 }
+        - { num_orders: 1000, delay: 2, user_id: 5 }
 
   - name: create-poke-synthetic-load-orders
     inputs:

@@ -2,6 +2,7 @@ apiVersion: argoproj.io/v1alpha1
 kind: Workflow
 metadata:
   generateName: kafka-topics-
+  namespace: argo
 spec:
   entrypoint: handle-kafka-topics
   arguments:
@@ -51,6 +52,13 @@ spec:
       - name: delete-topics
         template: delete-topics
         when: "{{inputs.parameters.operation}} == delete_topics"
+        arguments:
+          parameters:
+          - name: kafka-bootstrap-servers
+            value: "{{inputs.parameters.kafka-bootstrap-servers}}"
+      - name: describe-consumer
+        template: describe-consumer
+        when: "{{inputs.parameters.operation}} == describe_consumer"
         arguments:
           parameters:
           - name: kafka-bootstrap-servers
@@ -224,3 +232,12 @@ spec:
       image: confluentinc/cp-kafka:latest
       command: ["/bin/sh", "-c"]
       args: ["kafka-topics --describe --topic {{inputs.parameters.topic-name}} --bootstrap-server {{inputs.parameters.kafka-bootstrap-servers}}"]
+
+  - name: describe-consumer
+    inputs:
+      parameters:
+      - name: kafka-bootstrap-servers
+    container:
+      image: confluentinc/cp-kafka:latest
+      command: ["/bin/sh", "-c"]
+      args: ["kafka-consumer-groups --bootstrap-server {{inputs.parameters.kafka-bootstrap-servers}} --describe --group poke-order-consumer"]
