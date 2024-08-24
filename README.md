@@ -17,11 +17,7 @@ This repository contains an application based on an EDA (Event Driven Architectu
 
 ![Pokémon Order Site Simulation](media/chaos-kafka-experiments.png)
 
-This application simulates a Pokémon order site where Pokémon can be purchased and distributed to different countries. The order creation process is synchronous, meaning once an order is created, it is marked as pending in a database and published to a Kafka topic. 
-
-A fraud detection microservice then checks if the order meets certain criteria to be processed. If an order does not meet these criteria, it is marked as rejected. 
-
-If orders are not updated within a certain time frame (e.g., 2 minutes), a worker checks these pending orders in the database and marks them as reversed to indicate a failure in processing.
+This application simulates a Pokémon order site where Pokémon can be purchased and distributed to different countries. The order creation process is asynchronous, meaning that once an order is created, it is marked as pending in a database and then published to a Kafka topic. A fraud detection microservice asynchronously checks whether the order meets certain criteria for processing. If the order fails to meet these criteria, it is marked as rejected. If orders are not updated within a specific time frame (e.g., 2 minutes), a worker checks the pending orders in the database and marks them as reversed, indicating a failure in processing.
 
 ## Components
 

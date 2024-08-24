@@ -38,7 +38,7 @@ method:
       topic: ${topic}
       partition: 1
       messages:
-        - '{"id": 4054, "user_id": 2, "pokemon": "budew", "country": "Germany", "price": 246.0, "state": "pending", "timestamp": "2024-08-14 05:38:58.922008'
+        - '{"id": 4054, "user_id": 2, "pokemon": "rapidash", "country": "Germany", "price": 246.0, "state": "pending", "timestamp": "2024-08-14 05:38:58.922008'
   pauses:
       after: 120
   controls:
